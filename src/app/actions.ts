@@ -35,6 +35,18 @@ export async function updatePriority(id: string, priority: string) {
   revalidatePath("/");
 }
 
+export async function updateTask(id: string, title: string, dueDate: string) {
+  const trimmed = title.trim();
+  if (!trimmed) return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("tasks")
+    .update({ title: trimmed, due_date: dueDate || null })
+    .eq("id", id);
+  revalidatePath("/");
+}
+
 export async function deleteTask(id: string) {
   const supabase = await createClient();
   await supabase.from("tasks").delete().eq("id", id);
