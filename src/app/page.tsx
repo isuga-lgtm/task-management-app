@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ListTodo } from "lucide-react";
+import { ChevronDown, ListTodo } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { addTask } from "./actions";
 import TaskItem from "@/components/TaskItem";
@@ -12,6 +12,9 @@ type Task = {
   is_completed: boolean;
   due_date: string | null;
   priority: "high" | "medium" | "low";
+  assignee: string | null;
+  notes: string | null;
+  link_url: string | null;
 };
 
 const PRIORITY_RANK: Record<Task["priority"], number> = { high: 0, medium: 1, low: 2 };
@@ -32,7 +35,7 @@ export default async function Home({
   const supabase = await createClient();
   let query = supabase
     .from("tasks")
-    .select("id, title, is_completed, due_date, priority");
+    .select("id, title, is_completed, due_date, priority, assignee, notes, link_url");
 
   if (filter === "active") query = query.eq("is_completed", false);
   if (filter === "completed") query = query.eq("is_completed", true);
@@ -121,6 +124,18 @@ export default async function Home({
               </select>
             </div>
 
+            <div className="sm:w-40">
+              <label className="mb-1 block text-xs font-medium text-slate-500">
+                担当者
+              </label>
+              <input
+                name="assignee"
+                type="text"
+                placeholder="例: 山田"
+                className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 text-sm text-slate-700 transition focus:border-teal-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-100"
+              />
+            </div>
+
             <button
               type="submit"
               className="h-10 rounded-lg bg-teal-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 hover:shadow-md active:scale-[0.98] sm:w-auto"
@@ -128,6 +143,27 @@ export default async function Home({
               追加
             </button>
           </div>
+
+          <details className="group mt-3">
+            <summary className="flex w-fit cursor-pointer items-center gap-1 text-xs font-medium text-slate-400 transition hover:text-teal-600">
+              <ChevronDown className="h-3.5 w-3.5 transition group-open:rotate-180" />
+              詳細・リンクを追加
+            </summary>
+            <div className="mt-2 flex flex-col gap-2">
+              <textarea
+                name="notes"
+                placeholder="備考メモ"
+                rows={2}
+                className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-700 transition focus:border-teal-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-100"
+              />
+              <input
+                name="link_url"
+                type="url"
+                placeholder="参考URL（Slack・Webリンクなど）"
+                className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 text-sm text-slate-700 transition focus:border-teal-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-100"
+              />
+            </div>
+          </details>
         </form>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
