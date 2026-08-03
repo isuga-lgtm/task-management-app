@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { addTask } from "./actions";
-import { signOut } from "./login/actions";
 import TaskItem from "@/components/TaskItem";
 
 export default async function Home() {
@@ -16,16 +15,9 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 px-4 py-10">
       <div className="mx-auto max-w-md">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="on call" width={160} height={40} className="h-9 w-auto" />
-            <h1 className="text-xl font-semibold text-zinc-900">タスク一覧</h1>
-          </div>
-          <form action={signOut}>
-            <button className="text-xs text-zinc-400 hover:text-zinc-600">
-              ログアウト
-            </button>
-          </form>
+        <div className="mb-6 flex items-center gap-3">
+          <Image src="/logo.png" alt="on call" width={160} height={40} className="h-9 w-auto" />
+          <h1 className="text-xl font-semibold text-zinc-900">タスク一覧</h1>
         </div>
 
         <form action={addTask} className="mb-6 flex flex-col gap-2 rounded-md border border-zinc-200 bg-white p-3">
