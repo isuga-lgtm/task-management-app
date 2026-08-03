@@ -18,7 +18,7 @@ export default async function Home() {
       <div className="mx-auto max-w-md">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="on call" width={100} height={25} className="h-6 w-auto" />
+            <Image src="/logo.png" alt="on call" width={160} height={40} className="h-9 w-auto" />
             <h1 className="text-xl font-semibold text-zinc-900">タスク一覧</h1>
           </div>
           <form action={signOut}>

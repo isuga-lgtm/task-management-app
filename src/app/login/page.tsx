@@ -14,9 +14,9 @@ export default async function LoginPage({
         <Image
           src="/logo.png"
           alt="on call"
-          width={160}
-          height={40}
-          className="mx-auto mb-6 h-8 w-auto"
+          width={240}
+          height={60}
+          className="mx-auto mb-6 h-14 w-auto"
         />
         <h1 className="mb-6 text-center text-xl font-semibold text-zinc-900">
           タスク管理アプリ
