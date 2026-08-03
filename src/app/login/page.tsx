@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { signIn, signUp } from "./actions";
 
 export default async function LoginPage({
@@ -10,7 +11,14 @@ export default async function LoginPage({
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
       <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-sm">
-        <h1 className="mb-6 text-center text-2xl font-semibold text-zinc-900">
+        <Image
+          src="/logo.png"
+          alt="on call"
+          width={160}
+          height={40}
+          className="mx-auto mb-6 h-8 w-auto"
+        />
+        <h1 className="mb-6 text-center text-xl font-semibold text-zinc-900">
           タスク管理アプリ
         </h1>
 
@@ -55,7 +63,7 @@ export default async function LoginPage({
 
           <button
             formAction={signIn}
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+            className="rounded-md bg-[#00AEC7] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0090a6]"
           >
             ログイン
           </button>
