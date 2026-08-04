@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Calendar, ChevronDown, Pencil, Trash2, User } from "lucide-react";
 import { toggleTask, deleteTask, updatePriority, updateTask } from "@/app/actions";
 
@@ -78,8 +78,35 @@ export default function TaskItem({ task }: { task: Task }) {
   const [assignee, setAssignee] = useState(task.assignee ?? "");
   const [notes, setNotes] = useState(task.notes ?? "");
   const [linkUrl, setLinkUrl] = useState(task.link_url ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const dueBadge = getDueBadge(task.due_date, task.is_completed);
+
+  function handleToggle(checked: boolean) {
+    setError(null);
+    startTransition(async () => {
+      const result = await toggleTask(task.id, checked);
+      if (result.error) setError(result.error);
+    });
+  }
+
+  function handlePriorityChange(priority: string) {
+    setError(null);
+    startTransition(async () => {
+      const result = await updatePriority(task.id, priority);
+      if (result.error) setError(result.error);
+    });
+  }
+
+  function handleDelete() {
+    if (!window.confirm(`「${task.title}」を削除しますか？この操作は取り消せません。`)) return;
+    setError(null);
+    startTransition(async () => {
+      const result = await deleteTask(task.id);
+      if (result.error) setError(result.error);
+    });
+  }
 
   function handleSave() {
     if (!title.trim()) {
@@ -87,8 +114,15 @@ export default function TaskItem({ task }: { task: Task }) {
       setIsEditing(false);
       return;
     }
-    updateTask(task.id, { title, dueDate, assignee, notes, linkUrl });
-    setIsEditing(false);
+    setError(null);
+    startTransition(async () => {
+      const result = await updateTask(task.id, { title, dueDate, assignee, notes, linkUrl });
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      setIsEditing(false);
+    });
   }
 
   function handleCancel() {
@@ -97,6 +131,7 @@ export default function TaskItem({ task }: { task: Task }) {
     setAssignee(task.assignee ?? "");
     setNotes(task.notes ?? "");
     setLinkUrl(task.link_url ?? "");
+    setError(null);
     setIsEditing(false);
   }
 
@@ -149,18 +184,22 @@ export default function TaskItem({ task }: { task: Task }) {
           </div>
         </details>
 
+        {error && <p className="text-xs text-rose-600">{error}</p>}
+
         <div className="flex justify-end gap-2">
           <button
             onClick={handleCancel}
-            className="h-9 rounded-lg px-3 text-xs font-medium text-slate-500 hover:bg-slate-100"
+            disabled={isPending}
+            className="h-9 rounded-lg px-3 text-xs font-medium text-slate-500 hover:bg-slate-100 disabled:opacity-50"
           >
             キャンセル
           </button>
           <button
             onClick={handleSave}
-            className="h-9 rounded-lg bg-teal-600 px-4 text-xs font-semibold text-white hover:bg-teal-700"
+            disabled={isPending}
+            className="h-9 rounded-lg bg-teal-600 px-4 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
           >
-            保存
+            {isPending ? "保存中…" : "保存"}
           </button>
         </div>
       </li>
@@ -169,7 +208,7 @@ export default function TaskItem({ task }: { task: Task }) {
 
   return (
     <li
-      className={`group flex flex-col gap-2 rounded-xl border bg-white px-4 py-5 shadow-sm transition hover:shadow-md ${
+      className={`flex flex-col gap-2 rounded-xl border bg-white px-4 py-5 shadow-sm transition hover:shadow-md ${
         task.is_completed ? "border-slate-100 opacity-60" : "border-slate-200"
       }`}
     >
@@ -177,14 +216,12 @@ export default function TaskItem({ task }: { task: Task }) {
         <input
           type="checkbox"
           checked={task.is_completed}
-          onChange={(e) => toggleTask(task.id, e.target.checked)}
-          className="h-5 w-5 shrink-0 cursor-pointer rounded-full border-2 border-slate-300 accent-teal-600"
+          onChange={(e) => handleToggle(e.target.checked)}
+          disabled={isPending}
+          className="h-5 w-5 shrink-0 cursor-pointer rounded-full border-2 border-slate-300 accent-teal-600 disabled:opacity-50"
         />
 
-        <div
-          className="flex min-w-0 flex-1 flex-col gap-1 cursor-text"
-          onDoubleClick={() => setIsEditing(true)}
-        >
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span
             className={`truncate text-sm font-medium ${
               task.is_completed ? "text-slate-400 line-through" : "text-slate-800"
@@ -218,8 +255,9 @@ export default function TaskItem({ task }: { task: Task }) {
 
         <select
           value={task.priority}
-          onChange={(e) => updatePriority(task.id, e.target.value)}
-          className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold transition focus:outline-none focus:ring-2 ${PRIORITY_STYLES[task.priority]}`}
+          onChange={(e) => handlePriorityChange(e.target.value)}
+          disabled={isPending}
+          className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold transition focus:outline-none focus:ring-2 disabled:opacity-50 ${PRIORITY_STYLES[task.priority]}`}
         >
           <option value="high">{PRIORITY_LABELS.high}</option>
           <option value="medium">{PRIORITY_LABELS.medium}</option>
@@ -229,19 +267,22 @@ export default function TaskItem({ task }: { task: Task }) {
         <button
           onClick={() => setIsEditing(true)}
           aria-label="編集"
-          className="shrink-0 rounded-lg p-2 text-slate-300 opacity-0 transition group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-500"
+          className="shrink-0 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
         >
           <Pencil className="h-4 w-4" />
         </button>
 
         <button
-          onClick={() => deleteTask(task.id)}
+          onClick={handleDelete}
+          disabled={isPending}
           aria-label="削除"
-          className="shrink-0 rounded-lg p-2 text-slate-300 transition hover:bg-rose-50 hover:text-rose-500"
+          className="shrink-0 rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 disabled:opacity-50"
         >
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
+
+      {error && <p className="ml-8 text-xs text-rose-600">{error}</p>}
 
       <details className="ml-8 group">
         <summary className="flex w-fit cursor-pointer items-center gap-1 text-xs font-medium text-slate-400 transition hover:text-teal-600">
