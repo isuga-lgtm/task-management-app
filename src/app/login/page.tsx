@@ -1,12 +1,14 @@
 import Image from "next/image";
+import Link from "next/link";
 import { signIn, signUp } from "./actions";
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{ error?: string; message?: string; mode?: string }>;
 }) {
-  const { error, message } = await searchParams;
+  const { error, message, mode } = await searchParams;
+  const isSignUp = mode === "signup";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-teal-50 px-4">
@@ -18,8 +20,28 @@ export default async function LoginPage({
           height={60}
           className="mx-auto mb-6 h-14 w-auto"
         />
+
+        <div className="mb-6 flex gap-1 rounded-lg bg-slate-100 p-1">
+          <Link
+            href="/login?mode=signin"
+            className={`flex-1 rounded-md py-1.5 text-center text-sm font-medium transition ${
+              !isSignUp ? "bg-white text-teal-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            ログイン
+          </Link>
+          <Link
+            href="/login?mode=signup"
+            className={`flex-1 rounded-md py-1.5 text-center text-sm font-medium transition ${
+              isSignUp ? "bg-white text-teal-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            新規登録
+          </Link>
+        </div>
+
         <h1 className="mb-6 text-center text-xl font-semibold text-slate-800">
-          タスク一覧にログイン
+          {isSignUp ? "新規登録" : "ログイン"}
         </h1>
 
         <form className="flex flex-col gap-4">
@@ -61,18 +83,21 @@ export default async function LoginPage({
             </p>
           )}
 
-          <button
-            formAction={signIn}
-            className="h-10 rounded-lg bg-teal-600 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 hover:shadow-md active:scale-[0.98]"
-          >
-            ログイン
-          </button>
-          <button
-            formAction={signUp}
-            className="h-10 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-          >
-            新規登録
-          </button>
+          {isSignUp ? (
+            <button
+              formAction={signUp}
+              className="h-10 rounded-lg bg-teal-600 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 hover:shadow-md active:scale-[0.98]"
+            >
+              新規登録する
+            </button>
+          ) : (
+            <button
+              formAction={signIn}
+              className="h-10 rounded-lg bg-teal-600 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 hover:shadow-md active:scale-[0.98]"
+            >
+              ログインする
+            </button>
+          )}
         </form>
       </div>
     </div>
