@@ -15,6 +15,8 @@ type Task = {
   assignee: string | null;
   notes: string | null;
   link_url: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 const PRIORITY_RANK: Record<Task["priority"], number> = { high: 0, medium: 1, low: 2 };
@@ -35,7 +37,9 @@ export default async function Home({
   const supabase = await createClient();
   let query = supabase
     .from("tasks")
-    .select("id, title, is_completed, due_date, priority, assignee, notes, link_url");
+    .select(
+      "id, title, is_completed, due_date, priority, assignee, notes, link_url, created_at, updated_at"
+    );
 
   if (filter === "active") query = query.eq("is_completed", false);
   if (filter === "completed") query = query.eq("is_completed", true);

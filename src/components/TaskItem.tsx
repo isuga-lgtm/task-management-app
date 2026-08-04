@@ -13,6 +13,8 @@ type Task = {
   assignee: string | null;
   notes: string | null;
   link_url: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 const PRIORITY_STYLES: Record<Task["priority"], string> = {
@@ -32,6 +34,15 @@ function formatDueDate(dueDate: string) {
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const dd = String(date.getDate()).padStart(2, "0");
   return `${date.getFullYear()}/${mm}/${dd}`;
+}
+
+function formatDateTime(value: string) {
+  const date = new Date(value);
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${date.getFullYear()}/${mm}/${dd} ${hh}:${min}`;
 }
 
 function toDateInputValue(dueDate: string | null) {
@@ -156,8 +167,6 @@ export default function TaskItem({ task }: { task: Task }) {
     );
   }
 
-  const hasDetails = task.notes || task.link_url;
-
   return (
     <li
       className={`group flex flex-col gap-2 rounded-xl border bg-white px-4 py-5 shadow-sm transition hover:shadow-md ${
@@ -234,27 +243,27 @@ export default function TaskItem({ task }: { task: Task }) {
         </button>
       </div>
 
-      {hasDetails && (
-        <details className="ml-8 group">
-          <summary className="flex w-fit cursor-pointer items-center gap-1 text-xs font-medium text-slate-400 transition hover:text-teal-600">
-            <ChevronDown className="h-3.5 w-3.5 transition group-open:rotate-180" />
-            詳細を見る
-          </summary>
-          <div className="mt-1.5 flex flex-col gap-1.5 text-xs text-slate-500">
-            {task.notes && <p className="whitespace-pre-wrap">{task.notes}</p>}
-            {task.link_url && (
-              <a
-                href={task.link_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="truncate text-teal-600 underline hover:text-teal-700"
-              >
-                {task.link_url}
-              </a>
-            )}
-          </div>
-        </details>
-      )}
+      <details className="ml-8 group">
+        <summary className="flex w-fit cursor-pointer items-center gap-1 text-xs font-medium text-slate-400 transition hover:text-teal-600">
+          <ChevronDown className="h-3.5 w-3.5 transition group-open:rotate-180" />
+          詳細を見る
+        </summary>
+        <div className="mt-1.5 flex flex-col gap-1.5 text-xs text-slate-500">
+          {task.notes && <p className="whitespace-pre-wrap">{task.notes}</p>}
+          {task.link_url && (
+            <a
+              href={task.link_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate text-teal-600 underline hover:text-teal-700"
+            >
+              {task.link_url}
+            </a>
+          )}
+          <p className="text-slate-400">作成日時: {formatDateTime(task.created_at)}</p>
+          <p className="text-slate-400">更新日時: {formatDateTime(task.updated_at)}</p>
+        </div>
+      </details>
     </li>
   );
 }
