@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronDown, ListTodo } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { addTask } from "./actions";
+import { signOut } from "./login/actions";
 import TaskItem from "@/components/TaskItem";
 import SortSelect from "@/components/SortSelect";
 
@@ -79,12 +80,17 @@ export default async function Home({
             className="h-16 w-auto sm:h-20"
           />
           <div className="h-10 w-px bg-slate-200" />
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-1 items-center gap-1.5">
             <ListTodo className="h-5 w-5 text-teal-600" />
             <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">
               タスク一覧
             </h1>
           </div>
+          <form action={signOut}>
+            <button className="text-xs font-medium text-slate-400 hover:text-slate-600">
+              ログアウト
+            </button>
+          </form>
         </div>
       </header>
 

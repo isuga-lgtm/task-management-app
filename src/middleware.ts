@@ -29,8 +29,19 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    await supabase.auth.signInAnonymously();
+  const isRealUser = !!user && !user.is_anonymous;
+  const isAuthPage = request.nextUrl.pathname.startsWith("/login");
+
+  if (!isRealUser && !isAuthPage) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  if (isRealUser && isAuthPage) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse;
